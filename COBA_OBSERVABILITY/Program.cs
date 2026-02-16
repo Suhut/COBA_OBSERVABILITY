@@ -28,53 +28,28 @@ var resourceBuilder = ResourceBuilder.CreateDefault()
         ["service.version"] = "1.0.0"
     });
 
-// Configure OpenTelemetry Logging
 builder.Logging.ClearProviders();
-builder.Logging.AddOpenTelemetry(logging =>
-{
-    logging.IncludeFormattedMessage = true;
-    logging.SetResourceBuilder(resourceBuilder)
-        .AddConsoleExporter()
-        .AddOtlpExporter(opt =>
-        {
-            opt.Protocol = OpenTelemetry.Exporter.OtlpExportProtocol.HttpProtobuf;
-            //opt.Protocol = OpenTelemetry.Exporter.OtlpExportProtocol.Grpc;
-            opt.Endpoint = new Uri($"{otlpEndpoint}/v1/logs");
-            //opt.Endpoint = new Uri($"{otlpEndpoint}");
-            opt.Headers = otlpAuthHeader;
-        });
-});
-
-// Configure OpenTelemetry Tracing
+ 
 builder.Services.AddOpenTelemetry()
-     //.WithLogging(logging =>
-     //{
-     //    logging.AddConsoleExporter()
-     //           .AddOtlpExporter(opt =>
-     //           {
-     //               opt.Endpoint = new Uri($"{otlpEndpoint}/v1/logs");
-     //               opt.Headers = otlpAuthHeader;
-     //               opt.Protocol = OpenTelemetry.Exporter.OtlpExportProtocol.HttpProtobuf;
-     //           });
-     //})
+     .WithLogging(logging =>
+     { 
+         logging.SetResourceBuilder(resourceBuilder)
+                .AddConsoleExporter()
+                .AddOtlpExporter(opt =>
+                {
+                    opt.Protocol = OpenTelemetry.Exporter.OtlpExportProtocol.HttpProtobuf;
+                    opt.Endpoint = new Uri($"{otlpEndpoint}/v1/logs");
+                    opt.Headers = otlpAuthHeader;
+                });
+     })
     .WithTracing(tracing => tracing
-         .SetResourceBuilder(resourceBuilder)
-        //.ConfigureResource(resourceBuilder =>
-        //{
-        //    resourceBuilder.AddService(
-        //        builder.Environment.ApplicationName,
-        //        builder.Environment.EnvironmentName,
-        //        "1.0",
-        //        false,
-        //        Environment.MachineName);
-        //})
+         .SetResourceBuilder(resourceBuilder) 
         .AddSource(serviceName)
         .AddAspNetCoreInstrumentation()
         .AddHttpClientInstrumentation()
         .AddConsoleExporter()
         .AddOtlpExporter(opt =>
-        {
-            //opt.Protocol = OpenTelemetry.Exporter.OtlpExportProtocol.Grpc;
+        { 
             opt.Protocol = OpenTelemetry.Exporter.OtlpExportProtocol.HttpProtobuf;
             opt.Endpoint = new Uri($"{otlpEndpoint}/v1/traces");
             opt.Headers = otlpAuthHeader;

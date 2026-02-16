@@ -3,11 +3,7 @@
 ### Get Weather Forecast
 GET {{baseUrl}}/weatherforecast
 Accept: application/json
-
-### Get force
-GET {{baseUrl}}/force
-Accept: application/json
-
+ 
 ### Get OpenAPI Spec
 GET {{baseUrl}}/openapi/v1.json
 Accept: application/json
