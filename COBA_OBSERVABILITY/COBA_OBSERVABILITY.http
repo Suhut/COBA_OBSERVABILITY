@@ -1,0 +1,6 @@
+@COBA_OBSERVABILITY_HostAddress = http://localhost:5024
+
+GET {{COBA_OBSERVABILITY_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

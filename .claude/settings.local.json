@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(dotnet add package:*)",
+      "Bash(dotnet build:*)",
+      "Bash(gh repo view:*)",
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:raw.githubusercontent.com)",
+      "Bash(dotnet run:*)",
+      "Bash(curl:*)"
+    ]
+  }
+}
