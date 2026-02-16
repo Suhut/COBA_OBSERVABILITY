@@ -2,6 +2,7 @@ using System.Diagnostics;
 using System.Text;
 using OpenTelemetry.Logs;
 using OpenTelemetry.Resources;
+using OpenTelemetry.Metrics;
 using OpenTelemetry.Trace;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -75,8 +76,19 @@ builder.Services.AddOpenTelemetry()
         {
             //opt.Protocol = OpenTelemetry.Exporter.OtlpExportProtocol.Grpc;
             opt.Protocol = OpenTelemetry.Exporter.OtlpExportProtocol.HttpProtobuf;
-            opt.Endpoint = new Uri($"{otlpEndpoint}");
-            //opt.Endpoint = new Uri($"{otlpEndpoint}");
+            opt.Endpoint = new Uri($"{otlpEndpoint}/v1/traces");
+            opt.Headers = otlpAuthHeader;
+        }))
+    .WithMetrics(metrics => metrics
+        .SetResourceBuilder(resourceBuilder)
+        .AddAspNetCoreInstrumentation()
+        .AddHttpClientInstrumentation()
+        .AddRuntimeInstrumentation()
+        .AddConsoleExporter()
+        .AddOtlpExporter(opt =>
+        {
+            opt.Protocol = OpenTelemetry.Exporter.OtlpExportProtocol.HttpProtobuf;
+            opt.Endpoint = new Uri($"{otlpEndpoint}/v1/metrics");
             opt.Headers = otlpAuthHeader;
         }));
 
@@ -97,19 +109,8 @@ var activitySource = new ActivitySource(serviceName);
 var summaries = new[]
 {
     "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
-};
-
-app.MapGet("/force", () =>
-{
-    using var activity = new Activity("manual-test");
-    activity.Start();
-
-    Console.WriteLine($"TRACE ID: {activity.TraceId}");
-
-    activity.Stop();
-    return "ok";
-});
-
+}; 
+ 
 app.MapGet("/weatherforecast", (ILogger<Program> logger) =>
 {
     using var activity = activitySource.StartActivity("GenerateWeatherForecast");
